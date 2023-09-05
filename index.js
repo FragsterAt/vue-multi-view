@@ -6,7 +6,7 @@ let nextId = 0
 let hookIndex = undefined
 let nextUniqueKey = 0
 
-export function getNextUniqueKey () {
+export function getUniqueKey () {
   return ++nextUniqueKey
 }
 
