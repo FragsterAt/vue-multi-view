@@ -4,6 +4,11 @@ export const viewList = ref([])
 export const currentView = ref()
 let nextId = 0
 let hookIndex = undefined
+let nextUniqueKey = 0
+
+export function getNextUniqueKey () {
+  return ++nextUniqueKey
+}
 
 watch(currentView, (newId, oldId) => {
   const { onDeactivate } = viewList.value.find(({ id }) => id === oldId) ?? {}

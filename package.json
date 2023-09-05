@@ -1,6 +1,6 @@
 {
   "name": "vue-mdi-interface",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Simple lib to create multi document interface with vue, can be used with vue-router",
   "main": "index.js",
   "scripts": {
