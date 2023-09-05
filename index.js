@@ -1,9 +1,11 @@
-import { ref, defineComponent, h, cloneVNode, watch, nextTick } from "vue"
+import { ref, defineComponent, h, cloneVNode, watch, nextTick } from 'vue'
+
+export let ZERO_VIEW_ID = 0
 
 export const viewList = ref([])
-export const currentView = ref()
+export const currentView = ref(ZERO_VIEW_ID)
 let nextId = 0
-let hookIndex = undefined
+let hookIndex
 let nextUniqueKey = 0
 
 export function getUniqueKey () {
@@ -42,11 +44,13 @@ export async function openView (module, props, uniqueKey, parent) {
   const component = importedModule.default
 
   const { __name, __file } = component
-  const name = __name ?? __file.substring(__file.lastIndexOf("/") + 1, __file.lastIndexOf("."))
+  const name = __name ?? __file.substring(__file.lastIndexOf('/') + 1, __file.lastIndexOf('.'))
 
   const view = viewList.value.find(v =>
     v.name === name && v.uniqueKey === uniqueKey
   )
+
+  console.log('open view', name, props, uniqueKey)
 
   if (view) {
     currentView.value = view.id
@@ -55,18 +59,19 @@ export async function openView (module, props, uniqueKey, parent) {
   } else {
     viewList.value.push({ component, title: name, name, props: ref(props), uniqueKey, parent, id: ++nextId, onActivate: undefined, onDeactivate: undefined })
     hookIndex = viewList.value.length - 1
-    nextTick().then(() => hookIndex = undefined)
+    nextTick().then(() => { hookIndex = undefined })
     currentView.value = nextId
   }
   viewStack.unshift(nextId)
 }
 
 export function activateView (viewId) {
+  console.log('activateView', viewId)
   if (viewId) {
     const { id } = viewList.value.find(({ id }) => id === viewId) ?? {}
     currentView.value = id
   } else {
-    currentView.value = undefined
+    currentView.value = ZERO_VIEW_ID
   }
 }
 
@@ -90,19 +95,27 @@ export function closeAllViews () {
 const MdiViewComponent = defineComponent({
   name: 'MdiView',
   props: {
-    group: String
+    group: String,
+    hideStyle: { type: Object, default: () => ({ display: 'none' }) },
+    showStyle: { type: Object }
   },
   setup (props, { slots }) {
     return () => {
-      const defaultVNodes = slots.default().map(vNode => ({ vNode, show: currentView.value === undefined }))
+      const defaultVNodes = slots.default().map(vNode => ({ vNode, show: currentView.value === ZERO_VIEW_ID }))
+      console.log(defaultVNodes.map(({ vNode }) => vNode))
       const vNodes = [...defaultVNodes, ...viewList.value.map(({ component, props, id }) => ({ vNode: h(component, { ...props, key: id }), show: currentView.value === id }))]
-      return vNodes.map(({ vNode, show }) => show ? vNode : cloneVNode(vNode, { style: { display: 'none' } }))
+      console.log('render', vNodes)
+      return vNodes.map(({ vNode, show }) =>
+        !show ? cloneVNode(vNode, { style: props.hideStyle }) : props.showStyle ? cloneVNode(vNode, { style: props.showStyle }) : vNode
+      )
     }
   }
 })
 
 export const createMdiInterface = {
-  install (app, options) {
+  install (app, { zeroId = 0 } = {}) {
     app.component('MdiView', MdiViewComponent)
+    ZERO_VIEW_ID = zeroId
+    currentView.value = zeroId
   }
 }
