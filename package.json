@@ -1,0 +1,15 @@
+{
+  "name": "vue-mdi-interface",
+  "version": "1.0.0",
+  "description": "Simple lib to create multi document interface with vue, can be used with vue-router",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["vue", "interface", "window", "documents"],
+  "author": "Fragster",
+  "license": "ISC",
+  "dependencies": {
+    "vue": "^3.3.4"
+  }
+}
