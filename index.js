@@ -129,26 +129,28 @@ export function useMdiInterface ({ title, uniqueKey, meta = {} } = {}) {
  */
 export async function openView (name, props, uniqueKey, { parentViewId, inBackground = false } = {}) {
   if (!possibleViews[name]) throw new Error(`Wrong view '${name}', available names are: ${Object.keys(possibleViews)}`)
-  const importedModule = await possibleViews[name]()
-  const component = importedModule.default
+  const { title, meta, component: module } = possibleViews[name]
+  const component = (await module()).default
 
   let view = viewList.value.find(v =>
     v.name === name && unref(v.uniqueKey) === unref(uniqueKey) && v.parentViewId === parentViewId
   )
-
-  console.log(viewList.value.map(v => v.uniqueKey))
 
   if (view) {
     if (!inBackground) {
       viewStack = viewStack.filter(i => i !== view.viewId)
     }
     view.props = props
+    if (!inBackground) {
+      currentView.value = view.viewId
+      viewStack.unshift(view.viewId)
+    }
   } else {
     view = {
       component,
-      title: name,
+      title,
       name,
-      meta: {},
+      meta,
       props: toRef(props),
       uniqueKey: toRef(uniqueKey),
       parentViewId,
@@ -160,10 +162,10 @@ export async function openView (name, props, uniqueKey, { parentViewId, inBackgr
     viewList.value.push(view)
     hookIndex = viewList.value.length - 1
     nextTick().then(() => { hookIndex = undefined })
-  }
-  if (!inBackground) {
-    currentView.value = view.viewId
-    viewStack.unshift(currentView.value)
+    if (!inBackground) {
+      _currentView.value = view.viewId
+      viewStack.unshift(view.viewId)
+    }
   }
   return view.viewId
 }
@@ -197,7 +199,7 @@ export async function closeView (viewId) {
   }
 
   // try to close all descendants
-  if (!closeDescendantViews(viewId)) {
+  if (!(await closeDescendantViews(viewId))) {
     return false
   }
 
@@ -214,8 +216,13 @@ export async function closeView (viewId) {
  * @param {Number} viewId
  * @returns {Boolean} true if closed successfully
  */
-export function closeDescendantViews (viewId) {
-  viewList.value.filter(({ parentViewId }) => parentViewId === viewId).reduce((acc, { viewId }) => acc && closeView(viewId), true)
+export async function closeDescendantViews (viewId) {
+  const descendants = viewList.value.filter(({ parentViewId }) => parentViewId === viewId)
+  let res = true
+  for (const view of descendants) {
+    res &&= await closeView(view.viewId)
+  }
+  return res
 }
 
 /**
@@ -251,6 +258,13 @@ export const createMdiInterface = {
     app.component('MdiView', MdiViewComponent)
     ZERO_VIEW_ID = zeroId
     currentView.value = zeroId
-    Object.assign(possibleViews, views)
+
+    Object.assign(possibleViews, Object.fromEntries(Object.entries(views).map(([title, val]) => {
+      if (typeof val === 'function') {
+        return [title, { component: val, title, meta: {} }]
+      } else {
+        return [title, { component: undefined, title, meta: {}, ...val }]
+      }
+    })))
   }
 }
