@@ -102,7 +102,7 @@ export function onBeforeClose (fn, viewId) {
   }
 }
 
-export function useMdiInterface ({ title, uniqueKey, meta = {} } = {}) {
+export function useMultiView ({ title, uniqueKey, meta = {} } = {}) {
   const res = { currentView }
 
   if (hookIndex !== undefined) {
