@@ -1,6 +1,6 @@
 {
   "name": "vue-multi-view",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Simple lib to create multi document interface with vue, can be used with vue-router",
   "main": "index.js",
   "scripts": {
