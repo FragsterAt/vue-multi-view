@@ -4,6 +4,7 @@ library to handle many vue components like tabs in browser
 
 Compatible with vue-router
 
+Source code: https://github.com/FragsterAt/vue-multi-view
 Online demo: https://vmv-demo.fragster.ru/
 Demo source code: https://github.com/FragsterAt/vue-multi-view-demo
 
