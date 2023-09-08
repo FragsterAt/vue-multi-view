@@ -1,4 +1,4 @@
-# vue-mdi-interface
+# vue-multiview
 
 library to handle many vue components like tabs in browser
 
@@ -9,9 +9,9 @@ Demo source code: https://github.com/FragsterAt/mdi-interface-demo
 
 ## Installation
 ```bash
-yarn add vue-mdi-interface
+yarn add vue-multiview
 # or
-npm install vue-mdi-interface
+npm install vue-multiview
 ```
 
 ## Usage
@@ -36,13 +36,13 @@ const views = {
 
 ```javascript
 import { createApp } from 'vue'
-import { createMdiInterface } from 'vue-mdi-interface'
+import { createMultiView } from 'vue-mdi-interface'
 
 import App from './App.vue'
 
 const app = createApp(App)
 
-app.use(createMdiInterface, {views})
+app.use(createMultiView, { views })
 
 app.mount('#app')
 ```
@@ -88,3 +88,28 @@ Simple open view (or activate if it is opened)
 ### Close view
 
 ## API
+
+### Plugin options
+
+
+```javascript
+app.use(createMultiView, {
+  componentName: 'MultiView', // Optional, this is default value
+  views // Object with views definitions, required!
+})
+```
+
+view definition:
+
+key of object will be the view name, used in openView function
+```javascript
+const views = {
+  view1: {
+    title: 'Image view', // Optional, default value is the name of view. May be changed in view component
+    meta: { icon: 'calculate' },
+    component: () => import('pages/CounterView.vue')
+  },
+  view2: () => import('pages/EntityView.vue')
+}
+```
+

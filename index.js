@@ -1,6 +1,7 @@
 import { ref, defineComponent, h, cloneVNode, nextTick, unref, toRef, computed } from 'vue'
 
-export let ZERO_VIEW_ID = 0
+export const ZERO_VIEW_ID = 0
+let nextId = 0
 
 export const viewList = ref([])
 const _currentView = ref(ZERO_VIEW_ID)
@@ -41,7 +42,6 @@ export const currentView = computed({
     _currentView.value = viewId
   }
 })
-let nextId = 0
 let hookIndex
 let nextUniqueKey = 0
 const possibleViews = {}
@@ -235,7 +235,7 @@ export function closeAllViews () {
   // currentView.value = ZERO_VIEW_ID
 }
 
-const MdiViewComponent = defineComponent({
+const MultiViewComponent = defineComponent({
   name: 'MdiView',
   props: {
     group: String,
@@ -253,11 +253,9 @@ const MdiViewComponent = defineComponent({
   }
 })
 
-export const createMdiInterface = {
-  install (app, { zeroId = 0, views } = {}) {
-    app.component('MdiView', MdiViewComponent)
-    ZERO_VIEW_ID = zeroId
-    currentView.value = zeroId
+export const createMultiView = {
+  install (app, { componentName = 'MultiView', views } = {}) {
+    app.component(componentName, MultiViewComponent)
 
     Object.assign(possibleViews, Object.fromEntries(Object.entries(views).map(([title, val]) => {
       if (typeof val === 'function') {
