@@ -120,7 +120,7 @@ import { useMultiView } from 'src/../vue-multi-view'
 const {
   viewId, // id of view. may be used to open child views
   parentViewId, // id of parent views. may be used to open sibling views
-  uniqueKey // non reactive unique key of opened view, just for info
+  uniqueKey // readonly computed unique key of opened view, just for info
   } = useMultiView()
 ```
 `useMultiView()` **must** be called in setup (or onCreate if you use options api), if called in other places it will do nothing
@@ -138,7 +138,9 @@ const useMultiView({ // passed data can be
   }
 })
 ```
-if you change reactive uniqueKey (may be by saving new entity) - when new view is opened - it will search view with new value of key, look at 'entities' section of demo
+If you change reactive uniqueKey, when new view is opened - it will search view with new value of key, look at 'entities' section of demo.
+
+You can call useMultiView in child components of view, but it highly recommended not to pass any params in this case. See components/ViewInfo in demo
 
 ### Register hooks
 

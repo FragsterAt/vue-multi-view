@@ -1,4 +1,4 @@
-import { ref, defineComponent, h, cloneVNode, nextTick, unref, toRef, computed } from 'vue'
+import { ref, defineComponent, h, cloneVNode, nextTick, unref, computed } from 'vue'
 
 export const ZERO_VIEW_ID = 0
 let nextId = 0
@@ -103,16 +103,19 @@ export function onBeforeClose (fn, viewId) {
 }
 
 export function useMultiView ({ title, uniqueKey, meta = {} } = {}) {
-  const res = { currentView }
-
+  const res = { uniqueKey: computed(() => undefined) }
   if (hookIndex !== undefined) {
     const view = viewList.value[hookIndex]
-    view.title = title ?? view.title
-    view.uniqueKey = uniqueKey ?? view.uniqueKey
+    res.name = view.name
+
+    if (title !== undefined) view.title = title
+    if (uniqueKey !== undefined) {
+      view.uniqueKey = uniqueKey
+    }
 
     Object.assign(view.meta, meta)
     const { viewId, parentViewId } = view
-    Object.assign(res, { viewId, parentViewId, uniqueKey: view.uniqueKey })
+    Object.assign(res, { viewId, parentViewId, uniqueKey: computed(() => view.uniqueKey) })
   }
   return res
 }
@@ -151,8 +154,8 @@ export async function openView (name, props, uniqueKey, { parentViewId, inBackgr
       title,
       name,
       meta,
-      props: toRef(props),
-      uniqueKey: toRef(uniqueKey),
+      props,
+      uniqueKey,
       parentViewId,
       viewId: ++nextId,
       hooks: {
